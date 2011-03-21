@@ -51,11 +51,13 @@
 *
 ****************************************************************/
  
-#ifdef __COB_ROS__
+#ifdef __LINUX__
 #include "cob_vision_utils/VisionUtils.h"
 #else
 #include "cob_common/cob_vision_utils/common/include/cob_vision_utils/VisionUtils.h"
 #endif
+
+#include <fstream>
 
 using namespace ipa_Utils;
 
@@ -579,13 +581,13 @@ unsigned long ipa_Utils::FilterTearOffEdges(cv::Mat& xyzImage, cv::Mat* mask, fl
 		int index_vUp = -1;
 		int index_vDown = -1;
 
-		cv::Vec3d vLeft = cv::Vec3d::all(0);
-		cv::Vec3d vMiddle = cv::Vec3d::all(0);
-		cv::Vec3d vRight = cv::Vec3d::all(0);
-		cv::Vec3d vUp = cv::Vec3d::all(0);
-		cv::Vec3d vDown = cv::Vec3d::all(0);
+		cv::Vec3f vLeft = cv::Vec3f::all(0);
+		cv::Vec3f vMiddle = cv::Vec3f::all(0);
+		cv::Vec3f vRight = cv::Vec3f::all(0);
+		cv::Vec3f vUp = cv::Vec3f::all(0);
+		cv::Vec3f vDown = cv::Vec3f::all(0);
 
-		cv::Vec3d vDiff = cv::Vec3d::all(0);
+		cv::Vec3f vDiff = cv::Vec3f::all(0);
 
 		float* f_image_ptr_RowUp = 0;
 		float* f_image_ptr_RowMiddle = 0;
@@ -631,19 +633,21 @@ unsigned long ipa_Utils::FilterTearOffEdges(cv::Mat& xyzImage, cv::Mat* mask, fl
 				vLeft[1] = f_image_ptr_RowMiddle[3*index_vLeft + 1];
 				vLeft[2] = f_image_ptr_RowMiddle[3*index_vLeft + 2];
 				vDiff = vLeft - vMiddle;
-				double vLeftNorm = std::sqrt(std::pow(vLeft[0],2)+std::pow(vLeft[1],2)+std::pow(vLeft[2],2));
+				float vLeftNorm = std::sqrt((vLeft[0] * vLeft[0]) + 
+					(vLeft[1] * vLeft[1]) + (vLeft[2] * vLeft[2]));
 				vLeft[0] = vLeft[0]/vLeftNorm;
 				vLeft[1] = vLeft[1]/vLeftNorm;
 				vLeft[2] = vLeft[2]/vLeftNorm;
 				//vLeft.Normalize();
-				double vDiffNorm = std::sqrt(std::pow(vDiff[0],2)+std::pow(vDiff[1],2)+std::pow(vDiff[2],2));
+				float vDiffNorm = std::sqrt((vDiff[0] * vDiff[0]) +
+					(vDiff[1] * vDiff[1]) + (vDiff[2] * vDiff[2]));
 				vDiff[0] = vDiff[0]/vDiffNorm;
 				vDiff[1] = vDiff[1]/vDiffNorm;
 				vDiff[2] = vDiff[2]/vDiffNorm;
 				//vDiff.Normalize();
-				dot = vDiff.ddot(vLeft);
+				dot = (float)vDiff.ddot(vLeft);
 				//dot = vDiff.Dot(vLeft);
-				angle = std::acos(dot);
+				angle = (float)std::acos(dot);
 				//angle = Wm4::Math<float>::ACos( dot );
 				if (angle > t_upper || angle < t_lower)
 				{
@@ -663,19 +667,21 @@ unsigned long ipa_Utils::FilterTearOffEdges(cv::Mat& xyzImage, cv::Mat* mask, fl
 				vRight[1] = f_image_ptr_RowMiddle[3*index_vRight + 1];
 				vRight[2] = f_image_ptr_RowMiddle[3*index_vRight + 2];
 				vDiff = vRight - vMiddle;
-				double vRightNorm = std::sqrt(std::pow(vRight[0],2)+std::pow(vRight[1],2)+std::pow(vRight[2],2));
+				float vRightNorm = std::sqrt((vRight[0] * vRight[0]) + 
+					(vRight[1] * vRight[1]) + (vRight[2] * vRight[2]));
 				vRight[0] = vRight[0]/vRightNorm;
 				vRight[1] = vRight[1]/vRightNorm;
 				vRight[2] = vRight[2]/vRightNorm;
 				//vRight.Normalize();
-				double vDiffNorm = std::sqrt(std::pow(vDiff[0],2)+std::pow(vDiff[1],2)+std::pow(vDiff[2],2));
+				float vDiffNorm = std::sqrt((vDiff[0] * vDiff[0]) +
+					(vDiff[1] * vDiff[1]) + (vDiff[2] * vDiff[2]));
 				vDiff[0] = vDiff[0]/vDiffNorm;
 				vDiff[1] = vDiff[1]/vDiffNorm;
 				vDiff[2] = vDiff[2]/vDiffNorm;
 				//vDiff.Normalize();
-				dot = vDiff.ddot(vLeft);
+				dot = (float)vDiff.ddot(vLeft);
 				//dot = vDiff.Dot(vLeft);
-				angle = std::acos(dot);
+				angle = (float)std::acos(dot);
 				//angle = Wm4::Math<float>::ACos( dot );
 				if (angle > t_upper || angle < t_lower)
 				{
@@ -695,19 +701,21 @@ unsigned long ipa_Utils::FilterTearOffEdges(cv::Mat& xyzImage, cv::Mat* mask, fl
 				vUp[1] = f_image_ptr_RowUp[3*index_vUp + 1];
 				vUp[2] = f_image_ptr_RowUp[3*index_vUp + 2];
 				vDiff = vUp - vMiddle;
-				double vUpNorm = std::sqrt(std::pow(vUp[0],2)+std::pow(vUp[1],2)+std::pow(vUp[2],2));
+				float vUpNorm = std::sqrt((vUp[0] * vUp[0]) + 
+					(vUp[1] * vUp[1]) + (vUp[2] * vUp[2]));
 				vUp[0] = vUp[0]/vUpNorm;
 				vUp[1] = vUp[1]/vUpNorm;
 				vUp[2] = vUp[2]/vUpNorm;
 				//vUp.Normalize();
-				double vDiffNorm = std::sqrt(std::pow(vDiff[0],2)+std::pow(vDiff[1],2)+std::pow(vDiff[2],2));
+				float vDiffNorm = std::sqrt((vDiff[0] * vDiff[0]) +
+					(vDiff[1] * vDiff[1]) + (vDiff[2] * vDiff[2]));
 				vDiff[0] = vDiff[0]/vDiffNorm;
 				vDiff[1] = vDiff[1]/vDiffNorm;
 				vDiff[2] = vDiff[2]/vDiffNorm;
 				//vDiff.Normalize();
-				dot = vDiff.ddot(vLeft);
+				dot = (float)vDiff.ddot(vLeft);
 				//dot = vDiff.Dot(vLeft);
-				angle = std::acos(dot);
+				angle = (float)std::acos(dot);
 				//angle = Wm4::Math<float>::ACos( dot );
 				if (angle > t_upper || angle < t_lower)
 				{
@@ -726,19 +734,21 @@ unsigned long ipa_Utils::FilterTearOffEdges(cv::Mat& xyzImage, cv::Mat* mask, fl
 				vDown[0] = f_image_ptr_RowDown[3*index_vDown];
 				vDown[1] = f_image_ptr_RowDown[3*index_vDown + 1];
 				vDown[2] = f_image_ptr_RowDown[3*index_vDown + 2];
-				double vDownNorm = std::sqrt(std::pow(vDown[0],2)+std::pow(vDown[1],2)+std::pow(vDown[2],2));
+				float vDownNorm = std::sqrt((vDown[0] * vDown[0]) + 
+					(vDown[1] * vDown[1]) + (vDown[2] * vDown[2]));
 				vDown[0] = vDown[0]/vDownNorm;
 				vDown[1] = vDown[1]/vDownNorm;
 				vDown[2] = vDown[2]/vDownNorm;
 				//vDown.Normalize();
-				double vDiffNorm = std::sqrt(std::pow(vDiff[0],2)+std::pow(vDiff[1],2)+std::pow(vDiff[2],2));
+				float vDiffNorm = std::sqrt((vDiff[0] * vDiff[0]) +
+					(vDiff[1] * vDiff[1]) + (vDiff[2] * vDiff[2]));
 				vDiff[0] = vDiff[0]/vDiffNorm;
 				vDiff[1] = vDiff[1]/vDiffNorm;
 				vDiff[2] = vDiff[2]/vDiffNorm;
 				//vDiff.Normalize();
-				dot = vDiff.ddot(vLeft);
+				dot = (float)vDiff.ddot(vLeft);
 				//dot = vDiff.Dot(vLeft);
-				angle = std::acos(dot);
+				angle = (float)std::acos(dot);
 				//angle = Wm4::Math<float>::ACos( dot );
 				if (angle > t_upper || angle < t_lower)
 				{
@@ -774,7 +784,7 @@ unsigned long ipa_Utils::FilterSpeckles(cv::Mat& img, int maxSpeckleSize, double
     CV_Assert( img.type() == CV_32FC3 );
 
  
-    int newVal = 0;
+    float newVal = 0;
     int width = img.cols, height = img.rows, npixels = width*height;
     size_t bufSize = npixels*(int)(sizeof(cv::Point_<short>) + sizeof(int) + sizeof(uchar));
     if( !_buf.isContinuous() || !_buf.data || _buf.cols*_buf.rows*_buf.elemSize() < bufSize )
@@ -874,4 +884,70 @@ unsigned long ipa_Utils::FilterSpeckles(cv::Mat& img, int maxSpeckleSize, double
 	return ipa_Utils::RET_OK;
 }    
 
+unsigned long ipa_Utils::SaveMat(cv::Mat& mat, std::string filename)
+{
+	float* ptr = 0;
 
+	std::ofstream f(filename.c_str(), std::ios_base::binary);
+	if(!f.is_open())
+	{
+		std::cerr << "ERROR - ipa_Utils::SaveMat:" << std::endl;
+		std::cerr << "\t ... Could not open " << filename << " \n";
+		return ipa_Utils::RET_FAILED;
+	}
+	
+	int header[2];
+	header[0] = mat.rows;
+	header[1] = mat.cols;
+
+	f.write((char*)header, 2 * sizeof(int));
+
+	for(unsigned int row=0; row<(unsigned int)mat.rows; row++)
+	{
+		ptr = mat.ptr<float>(row);
+		f.write((char*)ptr, 3 * mat.cols * sizeof(float));
+	}
+
+	f.close();
+	return ipa_Utils::RET_OK;
+}
+
+unsigned long ipa_Utils::LoadMat(cv::Mat& mat, std::string filename)
+{
+	size_t file_length = 0;
+	char *c_string = 0;
+
+	std::ifstream file(filename.c_str(), std::ios_base::binary|std::ios_base::in|std::ios_base::ate);
+	if(!file.is_open())
+	{
+		std::cerr << "ERROR - ipa_Utils::LoadMat:" << std::endl;
+		std::cerr << "\t ... Could not open " << filename << " \n";
+		return ipa_Utils::RET_FAILED;
+	}
+
+	file_length = file.tellg();
+	file.seekg(0, std::ios_base::beg);
+	file.clear();
+
+	c_string = new char[file_length];
+	file.read(c_string, file_length);
+	
+	unsigned int rows, cols;
+	rows = ((int*)c_string)[0];
+	cols = ((int*)c_string)[1];
+
+	mat.create(rows, cols, CV_32FC3);
+	float* f_ptr;
+	char* c_ptr;
+
+	f_ptr = mat.ptr<float>(0);
+	c_ptr = &c_string[2 * sizeof(int)];
+
+	memcpy(f_ptr, c_ptr,  3 * mat.cols * mat.rows * sizeof(float));
+
+	file.close();
+
+	delete[] c_string;
+
+	return ipa_Utils::RET_OK;
+}
